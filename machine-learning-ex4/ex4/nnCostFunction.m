@@ -62,22 +62,97 @@ Theta2_grad = zeros(size(Theta2));
 %               and Theta2_grad from Part 2.
 %
 
+% 5000 by 401
+% X =  [ones(m,1),X];
 
+% (5000 by 401) * T(25 by 401) = 5000 by 25
+zLayer2              = [ones(m,1),X]*Theta1';
+activationUnitLayer2 = sigmoid( zLayer2  );
 
+% Add bias unit 5000 by 26
+activationUnitLayer2 = [ones(m,1),activationUnitLayer2];
 
+% (5000 by 26) * T(10 by 26) = 5000 by 10
+zLayer3              = activationUnitLayer2*Theta2';
+activationUnitLayer3 = sigmoid( zLayer3 );
 
+% Rename to output layer
+hTheta = activationUnitLayer3;
 
+label=1:num_labels;
 
+% Cost Function of NN
+J = -(1/m) *  sum( sum(  ( (y==label) .* log( hTheta(:,label) )) + ((1 - (y==label) ) .* log( 1 - hTheta(:,label)))  ) );
 
+% isolate non-bias units
+nonBiasUnits1 = 2:size(Theta1)(2);
+nonBiasUnits2 = 2:size(Theta2)(2);
 
+% Regularization of Cost Function
+J = J + (lambda/(2*m)) * (   sum(sum( Theta1(:, nonBiasUnits1 ) .^ 2) )   +   sum(sum( Theta2(:, nonBiasUnits2 ) .^ 2) ) );
 
+% delta3 = zeros(m,num_labels);
+% for k=1:num_labels
+%     delta3(:,k) = activationUnitLayer3(:,k) - (y==k);
+% endfor
 
+% % delta3               = 5000 x 10
+% % Theta2               = 10 x 26
+% % activationUnitLayer2 = 5000 x 26
+% % delta3 * Theta2      = 5000 x 26
+% % delta2               = 5000 x 26
+% delta2 = delta3 * Theta2  .* sigmoidGradient(activationUnitLayer2);
 
+% size(delta2)
+% %remove delta(2)0
+% delta2 = delta2(:,2:end);
+% size(delta2)
+% Delta2 = delta3'*activationUnitLayer2
 
+% size(Delta2)
+Delta1 = zeros( hidden_layer_size, input_layer_size + 1);
+Delta2 = zeros( num_labels, hidden_layer_size + 1);
+fprintf('Starting BP....\n  ');
 
+for i=1:m
 
+    % Forward propagation
 
+    % 1 x 401   *   T(25 x 401) = 1 x 25
+    a1 = [1, X(i,:)];
+    z2 = a1 * Theta1';
+    a2 = sigmoid ( z2 );
+    % 1 x 26
+    a2 = [1, a2];
 
+    % 1 x 26    *   T(10 x 26) = 1 x 10
+    z3 = a2 * Theta2';
+    a3 = sigmoid ( z3 );
+
+    % Back propagation
+
+    % 1 x 10
+    yVec       = zeros(1,num_labels);
+    yVec(y(i)) = 1;
+    delta3     = a3 - yVec;
+
+    % (1x10 o 1x10) * 10 x 26 = 1 x 25
+
+    % delta2 = ( delta3 .* sigmoidGradient ( z2 ) ) * Theta2;
+    delta2 = (delta3 * Theta2) .* ( a2 .* (1 - a2));
+    % 1 x 25
+    delta2 = delta2(2:end);
+
+    % 25x1 x 1x401 = 25 x 401
+    Delta1 = Delta1 + delta2' * a1;
+
+    % 10x1 x  1x26 = 10x26
+    Delta2 = Delta2 + delta3' * a2;
+
+endfor
+
+Theta1_grad = (1/m)*Delta1;
+Theta2_grad = (1/m)*Delta2;
 
 
 % -------------------------------------------------------------
