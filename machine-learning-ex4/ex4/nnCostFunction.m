@@ -91,28 +91,10 @@ nonBiasUnits2 = 2:size(Theta2)(2);
 % Regularization of Cost Function
 J = J + (lambda/(2*m)) * (   sum(sum( Theta1(:, nonBiasUnits1 ) .^ 2) )   +   sum(sum( Theta2(:, nonBiasUnits2 ) .^ 2) ) );
 
-% delta3 = zeros(m,num_labels);
-% for k=1:num_labels
-%     delta3(:,k) = activationUnitLayer3(:,k) - (y==k);
-% endfor
+fprintf('Starting BP....\n  ');
 
-% % delta3               = 5000 x 10
-% % Theta2               = 10 x 26
-% % activationUnitLayer2 = 5000 x 26
-% % delta3 * Theta2      = 5000 x 26
-% % delta2               = 5000 x 26
-% delta2 = delta3 * Theta2  .* sigmoidGradient(activationUnitLayer2);
-
-% size(delta2)
-% %remove delta(2)0
-% delta2 = delta2(:,2:end);
-% size(delta2)
-% Delta2 = delta3'*activationUnitLayer2
-
-% size(Delta2)
 Delta1 = zeros( hidden_layer_size, input_layer_size + 1);
 Delta2 = zeros( num_labels, hidden_layer_size + 1);
-fprintf('Starting BP....\n  ');
 
 for i=1:m
 
@@ -136,10 +118,11 @@ for i=1:m
     yVec(y(i)) = 1;
     delta3     = a3 - yVec;
 
-    % (1x10 o 1x10) * 10 x 26 = 1 x 25
-
-    % delta2 = ( delta3 .* sigmoidGradient ( z2 ) ) * Theta2;
+    % 1x10 * 10x26 = 1x26
+    % 1x26 o 1x26 o 1x26 = 1x26
     delta2 = (delta3 * Theta2) .* ( a2 .* (1 - a2));
+
+    % remove delta2(0)
     % 1 x 25
     delta2 = delta2(2:end);
 
@@ -151,16 +134,15 @@ for i=1:m
 
 endfor
 
-Theta1_grad = (1/m)*Delta1;
-Theta2_grad = (1/m)*Delta2;
+Theta1Rows = size(Theta1)(1)
+Theta2Rows = size(Theta2)(1)
 
+Theta1_grad = (1/m)*Delta1 + (lambda/m)*[ zeros(Theta1Rows,1), Theta1(:,2:end) ];
+Theta2_grad = (1/m)*Delta2 + (lambda/m)*[ zeros(Theta2Rows,1), Theta2(:,2:end) ];
 
 % -------------------------------------------------------------
-
 % =========================================================================
 
 % Unroll gradients
 grad = [Theta1_grad(:) ; Theta2_grad(:)];
-
-
 end
