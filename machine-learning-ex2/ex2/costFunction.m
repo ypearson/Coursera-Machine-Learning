@@ -29,6 +29,8 @@ grad = zeros(size(theta));
 %             [ t0*x0(2) + t1*x1(2) + tn+1*xn+1(2)]
 %             ...
 %             [ t0*x0(m) + t1*x1(m) + tn+1*xn+1(m)]
+size(X)
+size(theta)
 X*theta;
 
 z = sigmoid( X*theta );
