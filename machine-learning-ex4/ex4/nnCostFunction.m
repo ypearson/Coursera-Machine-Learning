@@ -122,6 +122,8 @@ for i=1:m
     % 1x26 o 1x26 o 1x26 = 1x26
     delta2 = (delta3 * Theta2) .* ( a2 .* (1 - a2));
 
+    % delta2 = (delta3 * Theta2) .* sigmoidGradient([1,z2]);
+
     % remove delta2(0)
     % 1 x 25
     delta2 = delta2(2:end);
